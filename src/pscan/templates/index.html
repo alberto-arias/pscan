@@ -1,0 +1,40 @@
+{% extends 'two_columns.html' %}
+
+{% block board %}
+<div class="container">
+    <div class="row">
+        <div class="container board">
+            {{ board | safe}}
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <form action="/scan" method="GET">
+                <div class="form-group">
+                  <label for="fen">Load FEN</label>
+                  <input type="text" class="form-control" name="fen" aria-describedby="FENHelp" placeholder="Paste FEN" autofocus>
+                  <small id="FENHelp" class="form-text text-muted">Use a FEN string to set the position to scan.</small>
+                </div>
+                <button type="submit" class="btn btn-primary">Load FEN</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block features %}
+<div class="card">
+    <div class="card">
+        <div class="card-body">
+            <h2>Goal</h2>
+            <p>As a proxy for improving your evaluation skills, this tool aims at improving your awareness to a number of relevant features of a chess position.</p>
+            <p>Indirectly, it´s been an opportunity for me to become familiar with <a href="https://python-chess.readthedocs.io/" target="_blank">python-chess</a>.</p>
+            <h2>How to</h2>
+            <p>Set a position in the board and force yourself to enumerate its relevant features, trying to match those identified by the tool.</p>
+        </div>
+        <div class="card-footer text-muted">
+            &copy; 2022 | Alberto Arias
+        </div>
+      </div>
+  </div>
+{% endblock %}

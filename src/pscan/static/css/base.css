@@ -1,0 +1,17 @@
+/* .card, .features-by-contribution .list-group-item {
+    background-color: #D5DBDB;
+} */
+
+.feature, .main-square {
+    visibility: hidden;
+}
+
+#board, #shortcuts-panel {
+    cursor: pointer;
+}
+
+/* To prevent click events on the board's pieces,
+allowing the square behind them to receive the event */
+use {
+    pointer-events: none;
+}

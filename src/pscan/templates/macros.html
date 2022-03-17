@@ -1,0 +1,29 @@
+{% macro color_features(features, bgcolor) %}
+<ul class="list-group list-group-flush features-by-contribution">
+    {% for feature_id, colors in features.items() %}
+    {% for color_id, feature in colors.items() %}
+    {% if feature['instances'] %}
+    {% for instance_id, instance in feature['instances'].items() %}
+    <li class="list-group-item" style="background-color: {{ bgcolor }};">
+        <ul class="list-inline feature feature-{{ feature_id }}" id="feature_{{ feature_id }}_{{ instance_id }}">
+            <li class="list-inline-item">
+                <span class="badge{% if instance['color'] %} bg-light text-dark{% else %} bg-dark{% endif %}" id="shortcut-{{ feature_id }}-{{ instance_id }}">{{ feature_id }}</span>
+            </li>
+            <li class="list-inline-item">
+                {% for sq in instance['main'].split('_') %}
+                <span class="badge bg-primary main-square" id="{{ feature_id }}-{{ instance_id }}-{{ sq }}">{{ sq }}</span>
+                {% endfor %}
+            </li>
+            <li class="list-inline-item">
+                {% for sq in instance['aux'].split('_') %}
+                <span class="badge bg-secondary aux-square">{{ sq }}</span>
+                {% endfor %}
+            </li>
+        </ul>
+    </li>
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+</ul>
+{% endmacro %}

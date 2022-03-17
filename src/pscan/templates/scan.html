@@ -1,0 +1,213 @@
+{% from 'macros.html' import color_features %}
+{% extends 'base.html' %}
+
+{% block main %}
+<div class="row" id="shortcuts-panel">
+    {% for shortcut, feature in features.items()|sort(attribute='1.id') %}
+    <div class="col-sm-2 small" data-bs-toggle="tooltip" title="{{ feature['description'] }}">
+        <span class="badge bg-info feature-shortcut-help" id="feature-shortcut-help-{{ feature['id'] }}">{{ feature['id'] }}</span> {{ feature['name'] }}
+    </div>
+    {% endfor %}
+</div>
+<hr class="my-4">
+<div class="row">
+    <div class="col-sm-4">
+        <div class="container" id="board">
+            {{ board | safe}}
+        </div>
+        <p class="lead text-center">{% if turn %}White to move{% else %}Black to move{% endif %}</p>
+    </div>
+    <div class="col-sm-8">
+        <div class="row">
+            {% set contributions = {"Vulnerabilities": {"value": -1, "background": "#555555" if turn else "#ffffff"}, "Neutral": {"value": 0, "background": "#eeeeee"}, "Threats": {"value": 1, "background": "#ffffff" if turn else "#555555"}} %}
+            {% for contribution_label, contribution in contributions.items() %}
+            <div class="col-sm-4">
+                <div class="card" style="background-color: {{ contribution['background'] }};">
+                    {{ color_features(results[contribution['value']], contribution['background']) }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<hr class="my-4">
+<div class="row justify-content-center">
+    <div class="col-sm-6">
+        <div class="alert alert-light" id="feature-alert"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js_scripts %}
+<script src="{{ url_for('static', filename='js/mousetrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/mousetrap-pause.min.js') }}"></script>
+<script>
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (e) {
+    return new bootstrap.Tooltip(e)
+    })
+    {% for contribution, features in results.items() %}
+    {% for feature_id, colors in features.items() %}
+    {% for color_id, feature in colors.items() %}
+    {% for instance_id, instance in feature['instances'].items() %}
+    var feature_{{ feature_id }}_{{ instance_id }} = document.getElementById('feature_{{ feature_id }}_{{ instance_id }}')
+    feature_{{ feature_id }}_{{ instance_id }}.addEventListener('mouseover', function(event) {
+        if (json_results[{{ contribution['value'] }}]['{{ feature_id }}']['{{ color_id }}']['instances']['{{ instance_id }}']['remaining'] == 0) {
+            var board_container = document.getElementById("board")
+            board_container.innerHTML = '{{ instance['svg'] | safe }}'
+            var help_badge = document.getElementById('feature-shortcut-help-{{ feature_id }}')
+            help_badge.classList.remove("bg-info")
+            help_badge.classList.add("bg-danger")
+        }
+    })
+    feature_{{ feature_id }}_{{ instance_id }}.addEventListener('mouseout', function(event) {
+        var board_container = document.getElementById("board")
+        board_container.innerHTML = '{{ board | safe }}'
+        var help_badge = document.getElementById('feature-shortcut-help-{{ feature_id }}')
+        help_badge.classList.remove("bg-danger")
+        help_badge.classList.add("bg-info")
+        enable_click_on_board_squares()
+    })
+    {% endfor %}
+    {% endfor %}
+    {% endfor %}
+    {% endfor %}
+
+    {% if json_results %}
+    var json_results = {{ json_results | safe }}
+    {% endif %}
+
+    class CmdState {
+        static Ready = new CmdState("READY")
+        static MatchedFeature = new CmdState("MATCHED_FEATURE")
+        static MatchedSquare = new CmdState("MATCHED_SQUARE")
+
+        constructor(name) {
+            this.name = name
+        }
+    }
+
+    class Answer {
+        static Full = new Answer("alert-success")
+        static Partial = new Answer("alert-warning")
+        static Redundant = new Answer("alert-info")
+        static Wrong = new Answer("alert-danger")
+
+        constructor(name) {
+            this.name = name
+        }
+    }
+
+    var cmd_state = CmdState.Ready
+    var cmd = {'id': '', 'squares': []}
+    {% if json_features %}
+    var json_features = {{ json_features | safe }}
+    {% endif %}
+    var feature_alert = document.getElementById('feature-alert')
+
+    function disable_feature_shortcuts() {
+        Mousetrap.unbind({{ feature_shortcuts | safe }})
+    }
+    function enable_feature_shortcuts() {
+        Mousetrap.bind({{ feature_shortcuts | safe }}, function(e, combo) {
+            feature_alert.innerHTML = '<span class="badge bg-success">' + json_features[combo]['id'] + '</span>' + ' (' + json_features[combo]['name'] + ')'
+            cmd['id'] = combo
+            cmd_state = CmdState.MatchedFeature
+            disable_feature_shortcuts()
+            enable_square_shortcuts()
+        })
+    }
+    function disable_square_shortcuts() {
+        Mousetrap.unbind({{ square_shortcuts | safe }})
+    }
+    function enable_square_shortcuts() {
+        Mousetrap.bind({{ square_shortcuts | safe }}, function(e, combo) {
+            cmd_state = CmdState.MatchedSquare
+            var square = combo.replace(/\s/g, '')
+            if (!cmd['squares'].includes(square)) {
+                feature_alert.innerHTML += ' <span class="badge bg-primary">' + square + '</span>'
+                cmd['squares'].push(combo)
+            }
+        })
+    }
+    function go_to_ready() {
+        feature_alert.innerHTML = ""
+        feature_alert.classList.remove("alert-light", "alert-success", "alert-warning", "alert-danger")
+        feature_alert.classList.add("alert-light")
+        cmd_state = CmdState.Ready
+        cmd = {'id': '', 'squares': []}
+        enable_feature_shortcuts()
+        disable_square_shortcuts()
+    }
+
+    function enable_click_on_board_squares() {
+        var board_squares = document.getElementById('board').getElementsByClassName('square')
+        for (var i = 0; i < board_squares.length; i++) {
+            board_squares[i].addEventListener('click', function(e) {
+                if (cmd_state == CmdState.Ready) return
+                const square_regex = /[a-h][1-8]/g
+                target_square_match = e.currentTarget.className.baseVal.match(square_regex)
+                target_square_shortcut = target_square_match[0].split("").join(" ")
+                if (target_square_match) {
+                    cmd_state = CmdState.MatchedSquare
+                    if (!cmd['squares'].includes(target_square_shortcut)) {
+                        feature_alert.innerHTML += ' <span class="badge bg-primary">' + target_square_match[0] + '</span>'
+                        cmd['squares'].push(target_square_shortcut)
+                    }
+                }
+            })
+        }
+    }
+
+    Mousetrap.bind('command+enter', function(e) {
+        var targets = document.getElementsByClassName("feature")
+        for(var i = 0; i < targets.length; i++) {
+            targets[i].style.visibility = 'visible'
+        }
+    })
+    Mousetrap.bind('esc', function(e) {
+        go_to_ready()
+    })
+    Mousetrap.bind('enter', function(e) {
+        cmd_id = cmd['id'].replace(/\s/g, '').toUpperCase()
+        answer = Answer.Wrong
+        var hits = 0
+        for (var contribution in json_results) {
+            if (cmd_id in json_results[contribution]) {
+                cmd['squares'].forEach(function(e) {
+                    sq = e.replace(/\s/g, '')
+                    for (var color in json_results[contribution][cmd_id]) {
+                        if (sq in json_results[contribution][cmd_id][color]['square_to_instance']) {
+                            answer = Answer.Redundant
+                            var main_str = json_results[contribution][cmd_id][color]['square_to_instance'][sq]
+                            if (!json_results[contribution][cmd_id][color]['instances'][main_str]['main_squares'][sq]) {
+                                hits += 1
+                                json_results[contribution][cmd_id][color]['instances'][main_str]['main_squares'][sq] = true
+                                json_results[contribution][cmd_id][color]['instances'][main_str]['remaining'] -= 1
+                                var target = document.getElementById('shortcut-' + cmd_id + '-' + main_str)
+                                if (target) target.style.visibility = 'visible'
+                                var target = document.getElementById(cmd_id + '-' + main_str + '-' + sq)
+                                if (target) target.style.visibility = 'visible'
+                                if (json_results[contribution][cmd_id][color]['instances'][main_str]['remaining'] == 0) {
+                                    var target = document.getElementById('feature_' + cmd_id + '_' + main_str)
+                                    if (target) target.style.visibility = 'visible'
+                                    answer = Answer.Full
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+            if (answer != Answer.Full && hits > 0) {
+                answer = Answer.Partial
+            }
+        feature_alert.classList.remove("alert-light", "alert-success", "alert-warning", "alert-danger")
+        feature_alert.classList.add(answer.name)
+        setTimeout(() => {  go_to_ready() }, 1000);
+        }
+    })
+    enable_feature_shortcuts()
+    enable_click_on_board_squares()
+
+</script>
+{% endblock %}

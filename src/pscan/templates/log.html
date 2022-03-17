@@ -1,0 +1,94 @@
+{% extends 'one_column.html' %}
+
+{% block content %}
+<dl class="row">
+
+    <dt class="col-sm-3">2022.03.17</dt>
+    <dd class="col-sm-9">
+        <p><span class="badge bg-danger">TODO</span> Study intersection between Isolated and Doubled Pawns features.</p>
+        <p><span class="badge bg-danger">TODO</span> Study intersection between X-Ray and Absolute/Relative Pin features.</p>
+    </dd>
+
+    <dt class="col-sm-3">2022.03.16</dt>
+    <dd class="col-sm-9">
+        <p>Updated feature command evaluation, to better match how features are shown on screen. Partial hits on main squares just reveal those squares (so user can keep track of correct but incomplete information). Only when the user completes all main squares for a feature, it is revealed in full and the corresponding SVG annotation is enabled.</p>
+    </dd>
+
+    <dt class="col-sm-3">2022.03.11</dt>
+    <dd class="col-sm-9">
+        <p>Initial implementation of X-Ray and Major Piece Alignment features.</p>
+    </dd>
+
+    <dt class="col-sm-3">2022.03.10</dt>
+    <dd class="col-sm-9">
+        <p>Added generation of Backward, Passed and Isolated Pawn bitboards during initialization, then made the corresponding feature detection use them.</p>
+    </dd>
+
+    <dt class="col-sm-3">2022.03.09</dt>
+    <dd class="col-sm-9">
+        <p>Read about bitboards.</p>
+    </dd>
+
+    <dt class="col-sm-3">2022.03.08</dt>
+    <dd class="col-sm-9">
+        <p>Added tooltips to the feature shortcuts panel, showing the description of each feature.</p>
+        <p>Implemented Doubled Pawns, Backward Pawn, Restricted King Mobility and Forkable Major Pieces features.</p>
+    </dd>
+
+    <dt class="col-sm-3">2022.03.07</dt>
+    <dd class="col-sm-9">
+        <p>Started implementing matching of feature commands against solutions.</p>
+        <p>Tentative implementation of revealing features as they are guessed correctly through commands.</p>
+        <p>Added option to click on squares on the board to provide squares for the feature commands.</p>
+    </dd>
+
+    <dt class="col-sm-3">2022.03.06</dt>
+    <dd class="col-sm-9">
+        <p>Started implementing keyboard shortcuts (using <a href="https://craig.is/killing/mice" target="_blank" rel="noopener noreferrer">Mousetrap</a>) to input features of the position.</p>
+        <p>Displayed panel in scan page with available features (id + description).</p>
+        <p>Reorganized board and features by contribution in scan page, using 4 columns.</p>
+    </dd>
+
+    <dt class="col-sm-3">2022.03.05</dt>
+    <dd class="col-sm-9">
+        <p>Created <code>FeatureInstance</code> class to encapsulate data for each feature instance. Visual annotation of features now may contain additional arrows, optionally. Auxiliary set of squares are also circled in yellow.</p>
+        <p>Added base css stylesheet.</p>
+        <p>Implemented Absolute Pin and Bishop Pair features.</p>
+    </dd>
+
+    <dt class="col-sm-3">2022.03.04</dt>
+    <dd class="col-sm-9">
+        <p>Started implementing functionality to, when hovering over a feature, visualize it by annotating the board accordingly.</p>
+    </dd>
+
+    <dt class="col-sm-3">2022.03.03</dt>
+    <dd class="col-sm-9">
+        <p>Built <code>dict</code> and jsonified <code>string</code> versions of the scan result, containing all features detected in a position.</p>
+        <p>Wrote tentative squeleton for showing results in the scan page.</p>
+        <p>Implemented King Is In Check feature.</p>
+    </dd>
+
+    <dt class="col-sm-3">2022.03.02</dt>
+    <dd class="col-sm-9">
+        <p>Added <a href="https://docs.python.org/3/library/logging.html#" target="_blank">logging</a> module to improve debug.</p>
+        <p>Tentative implementation of King As Only Defender feature.</p>
+        <p>Updated the <a href="{{ url_for('features')}}">features</a> page to be populated dynamically from the supported list of features.</p>
+    </dd>
+
+    <dt class="col-sm-3">2022.03.01</dt>
+    <dd class="col-sm-9">
+        <p>Added "King as only defender" to feature list.</p>
+        <p>Refreshed basic use of <a href="https://www.youtube.com/watch?v=HW29067qVWk">Jupyter Notebooks</a>, to better explore the python-chess API.</p>
+        <p>Tentative implementation of Undefended Pieces feature.</p>
+    </dd>
+
+    <dt class="col-sm-3">2022.02.28</dt>
+    <dd class="col-sm-9">
+        <p>Quick brainstorming for goal, how to achieve it, basic interface, app flow and tentative set of initial features.</p>
+        <p>Decided for a web-based implementation (vs stand-alone Python or Jupyter Notebook), using the Python web framework <a href="https://flask.palletsprojects.com/" target="_blank" rel="noopener noreferrer">Flask</a> together with the front-end toolkit <a href="https://getbootstrap.com/" target="_blank" rel="noopener noreferrer">Bootstrap</a>. Everything chess related will be handled by <a href="https://python-chess.readthedocs.io/en/stable/index.html" target="_blank">python-chess</a>. Did quick ramp ups for both <a href="https://www.youtube.com/watch?v=Z1RJmh_OqeA" target="_blank" rel="noopener noreferrer">Flask</a> and <a href="https://www.youtube.com/watch?v=eow125xV5-c" target="_blank" rel="noopener noreferrer">Bootstrap</a>.</p>
+        <p>Sketched <a href="/">home</a>, <a href="{{ url_for('scan', fen='r1b2rk1/2q2ppp/1p3n2/2bp4/3N4/6NP/PPP1BKP1/R2Q1R2 b - - 2 18') }}">scan</a>, <a href="{{ url_for('features')}}">features</a> and <a href="{{ url_for('log')}}">log</a> pages.</p>
+        <p>Captured initial list of relevant features.</p>
+    </dd>
+  
+</dl>
+{% endblock %}
