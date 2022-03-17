@@ -9,7 +9,7 @@
     </div>
     <div class="card">
         <div class="card-body">
-            <form action="/scan" method="GET">
+            <form action="{{ url_for('scan')}}" method="GET">
                 <div class="form-group">
                   <label for="fen">Load FEN</label>
                   <input type="text" class="form-control" name="fen" aria-describedby="FENHelp" placeholder="Paste FEN" autofocus>
@@ -27,10 +27,16 @@
     <div class="card">
         <div class="card-body">
             <h2>Goal</h2>
-            <p>As a proxy for improving your evaluation skills, this tool aims at improving your awareness to a number of relevant features of a chess position.</p>
-            <p>Indirectly, it´s been an opportunity for me to become familiar with <a href="https://python-chess.readthedocs.io/" target="_blank">python-chess</a>.</p>
+            <p>As a proxy for improving your evaluation skills, this tool aims at helping you train your awareness to a number of relevant features of a chess position.</p>
+            <p>Indirectly, it's been an opportunity for me to become familiar with <a href="https://python-chess.readthedocs.io/" target="_blank">python-chess</a>.</p>
             <h2>How to</h2>
-            <p>Set a position in the board and force yourself to enumerate its relevant features, trying to match those identified by the tool.</p>
+            <ul>
+                <li>Set a position in the board and force yourself to enumerate its relevant features, trying to match those identified by the tool.</li>
+                <li>Once you load the FEN for a position, you can see 3 columns of features to be guessed: <em>good for the opponent</em> (or bad for you), <em>neutral</em>, and <em>good for you</em> (or good for the opponent).</li>
+                <li>To guess a feature, start by typing the feature's acronym (e.g. <kbd>A</kbd><kbd>P</kbd><kbd>N</kbd> for Absolute Pin), followed by the relevant squares. To input the squares you can either type the coordinates (e.g. <kbd>e</kbd><kbd>5</kbd>), or directly click on the board. Finally, press <kbd>Enter</kbd> to let the tool evaluate your answer.</li>
+                <li>Correct answers will be gradually revealed on screen. Once a feature is guessed completely (e.g. all passed pawns for a player), the corresponding visual annotation is displayed on the board when you hover over the feature.</li>
+            </ul>
+            <p>A full list of all the features supported can be found on the <a href="{{ url_for('features')}}">Features</a> page.</p>
         </div>
         <div class="card-footer text-muted">
             &copy; 2022 | Alberto Arias
