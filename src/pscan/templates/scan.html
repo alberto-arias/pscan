@@ -161,8 +161,21 @@
 
     Mousetrap.bind('command+enter', function(e) {
         var targets = document.getElementsByClassName("feature")
-        for(var i = 0; i < targets.length; i++) {
+        for (var i = 0; i < targets.length; i++) {
             targets[i].style.visibility = 'visible'
+        }
+        var targets = document.getElementsByClassName("main-square")
+        for (var i = 0; i < targets.length; i++) {
+            targets[i].style.visibility = 'visible'
+        }
+        for (var contribution in json_results) {
+            for (var cmd_id in json_results[contribution]) {
+                for (var color_id in json_results[contribution][cmd_id]) {
+                    for (var instance_id in json_results[contribution][cmd_id][color_id]['instances']) {
+                        json_results[contribution][cmd_id][color_id]['instances'][instance_id]['remaining'] = 0
+                    }
+                }
+            }
         }
     })
     Mousetrap.bind('esc', function(e) {
