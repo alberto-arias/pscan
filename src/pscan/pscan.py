@@ -378,8 +378,22 @@ class OverloadedPiece(Feature):
         return Contribution.Negative
 
     def scan_color(self, board: ScanBoard, color: chess.Color) -> None:
-        pass
-
+        own_pieces = board.get_pieces(color, piece_types=all_pieces)
+        pieces_with_single_defender = {}
+        for target in own_pieces:
+            defenders = board.attackers(color, target)
+            if len(defenders) == 1:
+                pieces_with_single_defender[target] = defenders.pop()
+        overloaded_candidates = {}
+        for target, defender in pieces_with_single_defender.items():
+            entry = overloaded_candidates.setdefault(defender, ScanSquareSet())
+            entry.add(target)
+        for sq, targets in overloaded_candidates.items():
+            if len(targets) > 1:
+                main_square_set = ScanSquareSet.from_square(sq)
+                arrows = [chess.svg.Arrow(sq, t, color='yellow') for t in targets]
+                self.add_instance(color, main_square_set, targets, False, arrows)
+                logging.debug("%s: %s", self.id(), main_square_set.to_str())
 class AbsolutePin(Feature):
     def __init__(self) -> None:
         super().__init__()
